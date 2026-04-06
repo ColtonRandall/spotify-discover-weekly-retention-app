@@ -1,9 +1,11 @@
 package com.coltonrandall.spotify_discover_weekly_retention_app.service;
 
+import com.coltonrandall.spotify_discover_weekly_retention_app.model.AddTrackRequest;
 import com.coltonrandall.spotify_discover_weekly_retention_app.model.TracksResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -20,6 +22,9 @@ public class SpotifyService {
     @Value("${spotify.discover-weekly-playlist-id}")
     private String discoverWeeklyPlaylistId;
 
+    @Value("${spotify.target-playlist-id}")
+    private String targetPlaylistId;
+
     public SpotifyService() {
         this.client = RestClient
                 .builder()
@@ -28,7 +33,7 @@ public class SpotifyService {
     }
 
     public List<String> getDiscoverWeeklyTracks(String accessToken) {
-        log.info("Fetching tracks for playlist ID: '{}'", discoverWeeklyPlaylistId);
+        log.info("Fetching tracks for discover weekly playlist ID: '{}'", discoverWeeklyPlaylistId);
 
         TracksResponse response = client.get()
                 .uri("/v1/playlists/" + discoverWeeklyPlaylistId + "/tracks?additional_types=track")
@@ -36,10 +41,22 @@ public class SpotifyService {
                 .retrieve()
                 .body(TracksResponse.class);
 
-        if (response != null) {
-            return response.items().stream()
-                    .map(item -> item.track().uri())
-                    .toList();
-        } else return new ArrayList<>(){};
+        if (response == null) return new ArrayList<>();
+
+        return response.items().stream()
+                .map(item -> item.track().uri())
+                .toList();
+    }
+
+    public void addTracksToPlaylist(List<String> trackUris, String accessToken) {
+        log.info("Adding tracks for target playlist ID: '{}'", targetPlaylistId);
+
+        client.post()
+                .uri("/v1/playlists/" + targetPlaylistId + "/tracks")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new AddTrackRequest(trackUris))
+                .retrieve()
+                .toBodilessEntity();
     }
 }

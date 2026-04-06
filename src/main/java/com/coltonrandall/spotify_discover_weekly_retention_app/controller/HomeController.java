@@ -22,11 +22,15 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public List<String> home(@AuthenticationPrincipal OAuth2User user) {
+    public String home(@AuthenticationPrincipal OAuth2User user) {
 
         OAuth2AuthorizedClient oAuthClient = authorizedClientService.loadAuthorizedClient("spotify", user.getName());
         String accessToken = oAuthClient.getAccessToken().getTokenValue();
 
-        return spotifyService.getDiscoverWeeklyTracks(accessToken);
+        List<String> trackUris = spotifyService.getDiscoverWeeklyTracks(accessToken);
+        spotifyService.addTracksToPlaylist(trackUris, accessToken);
+
+        return "Added " + trackUris.size() + " tracks";
+
     }
 }
