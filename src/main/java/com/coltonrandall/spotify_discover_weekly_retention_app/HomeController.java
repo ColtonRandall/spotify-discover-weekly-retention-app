@@ -1,6 +1,8 @@
 package com.coltonrandall.spotify_discover_weekly_retention_app;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,10 +10,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HomeController {
 
+    SpotifyService spotifyService;
+    OAuth2AuthorizedClientService authorizedClientService;
+
+    public HomeController(SpotifyService spotifyService, OAuth2AuthorizedClientService authorizedClientService) {
+        this.spotifyService = spotifyService;
+        this.authorizedClientService = authorizedClientService;
+    }
+
     @GetMapping("/")
     public String home(@AuthenticationPrincipal OAuth2User user) {
+
+        OAuth2AuthorizedClient oAuthClient = authorizedClientService
+                .loadAuthorizedClient("spotify", user.getName());
+        String token = spotifyService
+                .getPlaylists(oAuthClient.getAccessToken().getTokenValue());
+
         String spotifyId = user.getAttribute("id");
         String displayName = user.getAttribute("display_name");
-        return "Logged in as: " + displayName + " (" + spotifyId + ")";
+        return "Logged in as: " + displayName + " (" + spotifyId + ")" + "token: " + token;
     }
 }
