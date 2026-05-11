@@ -35,3 +35,6 @@ build/
 ### Secrets ###
 .env
 keystore.p12
+
+### Claude ###
+CLAUDE.md
