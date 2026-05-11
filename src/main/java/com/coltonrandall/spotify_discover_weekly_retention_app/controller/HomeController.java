@@ -28,9 +28,15 @@ public class HomeController {
         String accessToken = oAuthClient.getAccessToken().getTokenValue();
 
         List<String> trackUris = spotifyService.getDiscoverWeeklyTracks(accessToken);
-        spotifyService.addTracksToPlaylist(trackUris, accessToken);
+        List<String> existingTracks = spotifyService.getTargetPlaylistTrackUris(accessToken);
+        List<String> newTracks = trackUris.stream().filter(uri -> !existingTracks.contains(uri)).toList();
 
-        return "Added " + trackUris.size() + " tracks";
+        if(newTracks.isEmpty()){
+            return "No new tracks added";
+        }
 
+        spotifyService.addTracksToPlaylist(newTracks, accessToken);
+
+        return "Total tracks: " + trackUris.size() + "\nTotal new tracks added: " + newTracks.size();
     }
 }
