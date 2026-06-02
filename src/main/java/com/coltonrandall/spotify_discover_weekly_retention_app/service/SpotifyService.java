@@ -29,8 +29,7 @@ public class SpotifyService {
     private String targetPlaylistId;
 
     public SpotifyService() {
-        this.client = RestClient
-                .builder()
+        this.client = RestClient.builder()
                 .baseUrl(BASE_URL)
                 .build();
     }
@@ -49,7 +48,8 @@ public class SpotifyService {
             if (response == null) break;
 
             for (Playlist playlist : response.items()) {
-                if ("Discover Weekly".equals(playlist.name()) && "spotify".equals(playlist.owner().id())) {
+                if ("Discover Weekly".equals(playlist.name()) && "spotify".equals(playlist.owner()
+                        .id())) {
                     log.info("Found Discover Weekly playlist: '{}'", playlist.id());
                     return playlist.id();
                 }
@@ -74,8 +74,10 @@ public class SpotifyService {
 
         if (response == null) return new ArrayList<>();
 
-        return response.items().stream()
-                .map(item -> item.track().uri())
+        return response.items()
+                .stream()
+                .map(item -> item.track()
+                        .uri())
                 .toList();
     }
 
@@ -105,8 +107,10 @@ public class SpotifyService {
 
             if (response == null) break;
 
-            response.items().stream()
-                    .map(item -> item.track().uri())
+            response.items()
+                    .stream()
+                    .map(item -> item.track()
+                            .uri())
                     .forEach(uris::add);
 
             String next = response.next();

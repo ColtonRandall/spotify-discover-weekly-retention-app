@@ -25,13 +25,16 @@ public class HomeController {
     public String home(@AuthenticationPrincipal OAuth2User user) {
 
         OAuth2AuthorizedClient oAuthClient = authorizedClientService.loadAuthorizedClient("spotify", user.getName());
-        String accessToken = oAuthClient.getAccessToken().getTokenValue();
+        String accessToken = oAuthClient.getAccessToken()
+                .getTokenValue();
 
         List<String> trackUris = spotifyService.getDiscoverWeeklyTracks(accessToken);
         List<String> existingTracks = spotifyService.getTargetPlaylistTrackUris(accessToken);
-        List<String> newTracks = trackUris.stream().filter(uri -> !existingTracks.contains(uri)).toList();
+        List<String> newTracks = trackUris.stream()
+                .filter(uri -> !existingTracks.contains(uri))
+                .toList();
 
-        if(newTracks.isEmpty()){
+        if (newTracks.isEmpty()) {
             return "No new tracks added";
         }
 
